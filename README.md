@@ -143,7 +143,6 @@ The README.md provides comprehensive documentation of the system, including:
 - Feature overview
 - Installation instructions
 - Project structure
-- API endpoints
 - Security features
 
 The requirements.txt lists the main Python packages needed to run the application.
