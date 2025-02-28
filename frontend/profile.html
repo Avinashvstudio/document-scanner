@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScanner - Profile Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            margin: -20px -20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-welcome {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .credits-info {
+            background: var(--light-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .credits-number {
+            font-size: 36px;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .reset-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .upload-section {
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background: var(--light-color);
+        }
+
+        .upload-section i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-section p {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+            background: white;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-color);
+            background: var(--light-color);
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--light-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .history-details {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-details h4 {
+            margin: 0;
+            color: var(--dark-color);
+            font-size: 16px;
+        }
+
+        .history-details small {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .similarity-score {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .similarity-score i {
+            font-size: 12px;
+        }
+
+        .similarity-score.no-match {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .request-credits {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .request-credits:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .user-welcome {
+                justify-content: center;
+            }
+        }
+
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            min-width: 300px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: translateX(120%);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .notification.removing {
+            animation: slideOut 0.5s forwards;
+        }
+
+        .notification i {
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            padding: 5px;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        /* Notification types */
+        .notification-success {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-success i {
+            color: var(--secondary-color);
+        }
+
+        .notification-error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification-error i {
+            color: var(--danger-color);
+        }
+
+        .notification-info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification-info i {
+            color: var(--primary-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(120%);
+            }
+        }
+
+        /* Add these styles to your existing CSS */
+        .history-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: #ffebee;
+            color: var(--danger-color);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="user-welcome">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h1>Welcome, <span id="username">User</span></h1>
+                        <p>Manage your documents and credits</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <aside class="sidebar">
+                <div class="credits-info">
+                    <i class="fas fa-coins fa-2x" style="color: var(--primary-color)"></i>
+                    <h3>Your Credits</h3>
+                    <div class="credits-number" id="credits">0</div>
+                    <div class="reset-info">
+                        Next reset: <span id="resetTime">Loading...</span>
+                    </div>
+                    <button class="request-credits" onclick="requestCredits()">
+                        <i class="fas fa-plus-circle"></i> Request Credits
+                    </button>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Document</h3>
+                    <p>Click or drag file to upload</p>
+                    <input type="file" id="fileInput" style="display: none" accept=".txt">
+                </div>
+
+                <div class="history-section">
+                    <div class="section-header">
+                        <i class="fas fa-history"></i>
+                        <h2>Scan History</h2>
+                    </div>
+                    <div id="scanHistory"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script>
+        // Load user profile data
+        async function loadProfile() {
+            try {
+                const response = await fetch('/user/profile', {
+                    credentials: 'same-origin',  // Include cookies in request
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 403) {
+                    // Session expired or not logged in
+                    notificationSystem.show('Please login to continue', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 2000);
+                    return;
+                }
+
+                const data = await response.json();
+                
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('credits').textContent = data.credits;
+                document.getElementById('resetTime').textContent = data.next_reset;
+                
+                // Load scan history
+                if (data.scans && data.scans.length > 0) {
+                    const historyHtml = data.scans.map(scan => `
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="history-details">
+                                <div class="history-info">
+                                    <h4>${scan.filename}</h4>
+                                    <small>Scanned on: ${new Date(scan.timestamp).toLocaleString()}</small>
+                                </div>
+                                <div class="history-status">
+                                    <span class="similarity-score ${scan.similarity > 0 ? '' : 'no-match'}">
+                                        <i class="fas fa-chart-line"></i> 
+                                        ${scan.similarity.toFixed(2)}% Match
+                                    </span>
+                                    <button class="btn-icon btn-delete" onclick="deleteHistory('${scan.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('scanHistory').innerHTML = historyHtml;
+                } else {
+                    document.getElementById('scanHistory').innerHTML = `
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="history-details">
+                                <div class="history-info">
+                                    <h4>No scan history available</h4>
+                                    <small>Upload a document to get started</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                notificationSystem.show('Error loading profile data', 'error');
+            }
+        }
+
+        // Notification System
+        const notificationSystem = {
+            container: document.getElementById('notificationContainer'),
+
+            show(message, type = 'info', duration = 5000) {
+                const id = 'notification-' + Date.now();
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    info: 'fas fa-info-circle'
+                };
+                const titles = {
+                    success: 'Success',
+                    error: 'Error',
+                    info: 'Information'
+                };
+
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.id = id;
+                notification.innerHTML = `
+                    <i class="${icons[type]}"></i>
+                    <div class="notification-content">
+                        <div class="notification-title">${titles[type]}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <div class="notification-close" onclick="notificationSystem.remove('${id}')">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+
+                this.container.appendChild(notification);
+
+                // Auto remove after duration
+                setTimeout(() => this.remove(id), duration);
+            },
+
+            remove(id) {
+                const notification = document.getElementById(id);
+                if (notification) {
+                    notification.classList.add('removing');
+                    setTimeout(() => notification.remove(), 500);
+                }
+            }
+        };
+
+        // Handle document upload
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            if (e.target.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('file', e.target.files[0]);
+
+            try {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    notificationSystem.show('Document uploaded and scanned successfully', 'success');
+                    
+                    if (result.similar_documents && result.similar_documents.length > 0) {
+                        notificationSystem.show(`Found ${result.total_matches} similar documents`, 'info');
+                    } else {
+                        notificationSystem.show('No similar documents found', 'info');
+                    }
+                    
+                    loadProfile();
+                } else {
+                    notificationSystem.show(result.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                notificationSystem.show('Error during upload', 'error');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                e.target.value = '';
+            }
+        });
+
+        async function requestCredits() {
+            try {
+                const response = await fetch('/credits/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const message = await response.text();
+                
+                if (response.ok) {
+                    notificationSystem.show(message, 'success');
+                    loadProfile();
+                } else {
+                    notificationSystem.show(message, 'error');
+                }
+            } catch (error) {
+                console.error('Error requesting credits:', error);
+                notificationSystem.show('Failed to request credits', 'error');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                notificationSystem.show('Logging out...', 'info', 2000);
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } catch (error) {
+                notificationSystem.show('Logout failed', 'error');
+            }
+        }
+
+        // Add this function to handle scan history deletion
+        async function deleteHistory(scanId) {
+            if (!confirm('Are you sure you want to delete this scan history?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/scan/history/${scanId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'  // This ensures cookies/session are sent
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    notificationSystem.show(data.message || 'Scan history deleted successfully', 'success');
+                    loadProfile(); // Reload the profile to update the history
+                } else {
+                    notificationSystem.show(data.error || 'Failed to delete scan history', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting scan history:', error);
+                notificationSystem.show('Error deleting scan history', 'error');
+            }
+        }
+
+        // Load profile when page loads
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScanner - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            margin: -20px -20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-header i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .card-header h1 {
+            color: var(--dark-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: var(--light-color);
+            border-radius: 8px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .role-btn.active {
+            background: white;
+            box-shadow: var(--shadow);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--primary-color);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 20px;
+            }
+        }
+
+        .error {
+            border-color: var(--danger-color) !important;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-control.error + .error-message {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="logo">
+                    <i class="fas fa-file-search"></i> DocScanner
+                </a>
+                <div class="nav-links">
+                    <a href="register.html" class="btn btn-secondary">Register</a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="card-header">
+                <i class="fas fa-user-circle"></i>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your account</p>
+            </div>
+
+            <div class="role-selector">
+                <button class="role-btn active" onclick="setRole('user')">
+                    <i class="fas fa-user"></i> User
+                </button>
+                <button class="role-btn" onclick="setRole('admin')">
+                    <i class="fas fa-user-shield"></i> Admin
+                </button>
+            </div>
+
+            <div class="alert alert-error" id="errorAlert"></div>
+            <div class="alert alert-success" id="successAlert"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+
+                <div class="loading" id="loadingSpinner">
+                    <i class="fas fa-spinner fa-spin"></i> Logging in...
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+
+            <div class="form-footer">
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'user';
+
+        function setRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.role-btn').classList.add('active');
+        }
+
+        function showAlert(message, type) {
+            const alertElement = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function showFormError(message, field = null) {
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+
+            if (field) {
+                const input = document.getElementById(field);
+                input.classList.add('error');
+                input.addEventListener('input', () => {
+                    input.classList.remove('error');
+                    errorAlert.style.display = 'none';
+                }, { once: true });
+            }
+
+            setTimeout(() => {
+                errorAlert.style.display = 'none';
+            }, 5000);
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Client-side validation
+            if (!username) {
+                showFormError('Please enter your username', 'username');
+                return;
+            }
+            
+            if (!password) {
+                showFormError('Please enter your password', 'password');
+                return;
+            }
+
+            try {
+                loadingSpinner.style.display = 'block';
+                
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: currentRole })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = currentRole === 'admin' ? '/admin.html' : '/profile.html';
+                    }, 1000);
+                } else {
+                    showFormError(data.error || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                showFormError('Network error. Please try again later.');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

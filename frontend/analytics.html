@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScanner - Analytics Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        .analytics-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            margin: -20px -20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title i {
+            font-size: 32px;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label i {
+            color: var(--primary-color);
+        }
+
+        .filter-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-btn {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: var(--light-color);
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            background: var(--light-color);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 18px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stats-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        .stats-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .trend-up {
+            color: var(--secondary-color);
+        }
+
+        .trend-down {
+            color: var(--danger-color);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .export-btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="analytics-header">
+        <div class="container">
+            <button onclick="window.location.href='/admin.html'" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <div class="header-content">
+                <div class="header-title">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>Analytics Dashboard</h1>
+                </div>
+                <div class="header-actions">
+                    <button onclick="exportData()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> Date Range</label>
+                    <input type="text" id="dateRange" class="filter-input" placeholder="Select date range">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-user"></i> User Filter</label>
+                    <select id="userFilter" class="filter-input">
+                        <option value="">All Users</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-tasks"></i> Activity Type</label>
+                    <select id="activityFilter" class="filter-input">
+                        <option value="">All Activities</option>
+                        <option value="scans">Scans</option>
+                        <option value="credits">Credits Usage</option>
+                        <option value="requests">Credit Requests</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-sort"></i> Sort By</label>
+                    <select id="sortBy" class="filter-input">
+                        <option value="date">Date</option>
+                        <option value="activity">Activity</option>
+                        <option value="credits">Credits</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <!-- Usage Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-area"></i> Daily Usage
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="toggleChartType('usageChart')">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="usageChart"></canvas>
+                <div class="loading-overlay" style="display: none">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- Topics Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-pie-chart"></i> Document Topics
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="toggleChartType('topicsChart')">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="topicsChart"></canvas>
+                <div class="loading-overlay" style="display: none">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- Credits Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-coins"></i> Credits Usage
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="toggleChartType('creditsChart')">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="creditsChart"></canvas>
+                <div class="loading-overlay" style="display: none">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- Activity Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-users"></i> User Activity
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="toggleChartType('activityChart')">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="activityChart"></canvas>
+                <div class="loading-overlay" style="display: none">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Users Table -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-trophy"></i> Top Users
+                </div>
+            </div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Total Scans</th>
+                        <th>Credits Used</th>
+                        <th>Most Common Topic</th>
+                        <th>Last Activity</th>
+                        <th>Success Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="topUsersList"></tbody>
+            </table>
+        </div>
+
+        <!-- Topics Analysis Table -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-tags"></i> Document Topics Analysis
+                </div>
+            </div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Document Count</th>
+                        <th>Percentage</th>
+                        <th>Average Similarity</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody id="topicsList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Flatpickr for date range picker
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: [new Date().setDate(new Date().getDate() - 30), new Date()]
+        });
+
+        // Add chart type toggle functionality
+        function toggleChartType(chartId) {
+            const chart = chartInstances[chartId];
+            if (!chart) return;
+
+            const types = ['line', 'bar'];
+            const currentType = chart.config.type;
+            const newType = types[(types.indexOf(currentType) + 1) % types.length];
+
+            createOrUpdateChart(chartId, {
+                labels: chart.data.labels,
+                values: chart.data.datasets[0].data
+            }, newType, chart.options.plugins.title.text);
+        }
+
+        // Initialize date picker
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: [
+                new Date().setDate(new Date().getDate() - 7),
+                new Date()
+            ],
+            onChange: function(selectedDates) {
+                if (selectedDates.length === 2) {
+                    loadAnalytics();
+                }
+            }
+        });
+
+        // Add event listeners for filters
+        document.getElementById('userFilter').addEventListener('change', loadAnalytics);
+        document.getElementById('activityFilter').addEventListener('change', loadAnalytics);
+        document.getElementById('sortBy').addEventListener('change', loadAnalytics);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            loadAnalytics();
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/admin/users');
+                const users = await response.json();
+                const userFilter = document.getElementById('userFilter');
+                
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = user.username;
+                    userFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function loadAnalytics() {
+            showLoaders(true);
+            try {
+                const dateRange = document.getElementById('dateRange').value;
+                const userFilter = document.getElementById('userFilter').value;
+                const activityFilter = document.getElementById('activityFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+
+                const queryParams = new URLSearchParams({
+                    dateRange,
+                    user: userFilter,
+                    activity: activityFilter,
+                    sort: sortBy
+                });
+
+                const response = await fetch(`/admin/analytics?${queryParams}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch analytics data');
+                }
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Create or update charts
+                createOrUpdateChart('usageChart', {
+                    labels: data.usage_data.labels,
+                    values: data.usage_data.values
+                }, 'line', 'Daily Scans');
+
+                createOrUpdateChart('topicsChart', {
+                    labels: data.topics_data.labels,
+                    values: data.topics_data.values
+                }, 'pie', 'Document Topics Distribution');
+
+                createOrUpdateChart('creditsChart', {
+                    labels: data.credits_data.labels,
+                    values: data.credits_data.values
+                }, 'bar', 'Credits Usage by User');
+
+                createOrUpdateChart('activityChart', {
+                    labels: data.activity_data.labels,
+                    values: data.activity_data.values
+                }, 'line', 'User Activity Over Time');
+
+                displayTopUsers(data.top_users || []);
+                displayTopics(data.topics_analysis || []);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                showError('Failed to load analytics data');
+                createEmptyCharts();
+            } finally {
+                showLoaders(false);
+            }
+        }
+
+        // Chart management
+        const chartInstances = {};
+
+        function createOrUpdateChart(canvasId, data, type, title) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            const config = {
+                type: type,
+                data: {
+                    labels: data.labels?.length ? data.labels : ['No Data'],
+                    datasets: [{
+                        label: title,
+                        data: data.values?.length ? data.values : [0],
+                        borderColor: type === 'line' ? '#007bff' : undefined,
+                        backgroundColor: type === 'pie' ? [
+                            '#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'
+                        ] : type === 'bar' ? '#28a745' : undefined,
+                        tension: type === 'line' ? 0.1 : undefined
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title
+                        }
+                    },
+                    scales: type !== 'pie' ? {
+                        y: {
+                            beginAtZero: true
+                        }
+                    } : undefined
+                }
+            };
+
+            chartInstances[canvasId] = new Chart(ctx, config);
+        }
+
+        function showLoaders(show) {
+            document.querySelectorAll('.loading-overlay').forEach(overlay => {
+                overlay.style.display = show ? 'flex' : 'none';
+            });
+        }
+
+        function showError(message) {
+            // Add this div to your HTML
+            const errorDiv = document.createElement('div');
+            errorDiv.style.color = 'red';
+            errorDiv.style.padding = '10px';
+            errorDiv.style.marginBottom = '20px';
+            errorDiv.textContent = message;
+            document.querySelector('.container').prepend(errorDiv);
+        }
+
+        function createEmptyCharts() {
+            const emptyData = {
+                labels: ['No Data Available'],
+                values: [0]
+            };
+            
+            createOrUpdateChart('usageChart', emptyData, 'line', 'Daily Scans');
+            createOrUpdateChart('topicsChart', emptyData, 'pie', 'Document Topics Distribution');
+            createOrUpdateChart('creditsChart', emptyData, 'bar', 'Credits Usage by User');
+            createOrUpdateChart('activityChart', emptyData, 'line', 'User Activity Over Time');
+            
+            // Show empty tables
+            document.getElementById('topUsersList').innerHTML = 
+                '<tr><td colspan="6">No data available</td></tr>';
+            document.getElementById('topicsList').innerHTML = 
+                '<tr><td colspan="5">No data available</td></tr>';
+        }
+
+        function displayTopUsers(users) {
+            const usersList = document.getElementById('topUsersList');
+            if (!usersList) return;
+
+            if (!users.length) {
+                usersList.innerHTML = '<tr><td colspan="6">No user data available</td></tr>';
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.total_scans || 0}</td>
+                    <td>${user.credits_used || 0}</td>
+                    <td>${user.common_topic || 'N/A'}</td>
+                    <td>${user.last_activity || 'Never'}</td>
+                    <td>${(user.success_rate || 0).toFixed(1)}%</td>
+                </tr>
+            `).join('');
+        }
+
+        function displayTopics(topics) {
+            const topicsList = document.getElementById('topicsList');
+            if (!topicsList) return;
+
+            if (!topics.length) {
+                topicsList.innerHTML = '<tr><td colspan="5">No topic data available</td></tr>';
+                return;
+            }
+
+            topicsList.innerHTML = topics.map(topic => `
+                <tr>
+                    <td>${topic.name || 'Unknown'}</td>
+                    <td>${topic.count || 0}</td>
+                    <td>${(topic.percentage || 0).toFixed(1)}%</td>
+                    <td>${(topic.average_similarity || 0).toFixed(1)}%</td>
+                    <td>${topic.trend || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        async function exportData() {
+            try {
+                const response = await fetch('/admin/export-data');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Failed to export data');
+            }
+        }
+    </script>
+</body>
+</html>

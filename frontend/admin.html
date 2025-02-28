@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScanner - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Add the same header style as analytics */
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            margin: -20px -20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title i {
+            font-size: 32px;
+        }
+
+        /* Stats Grid */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-header i {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            background: var(--light-color);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 18px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 12px 15px 12px 35px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+            outline: none;
+            width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* User and Request Tables */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stats-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        .stats-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        .btn-delete {
+            background: #ffebee;
+            color: var(--danger-color);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .table-actions {
+                width: 100%;
+            }
+        }
+
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            min-width: 300px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: translateX(120%);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .notification.removing {
+            animation: slideOut 0.5s forwards;
+        }
+
+        .notification i {
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            padding: 5px;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        /* Notification types */
+        .notification-success {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-success i {
+            color: var(--secondary-color);
+        }
+
+        .notification-error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification-error i {
+            color: var(--danger-color);
+        }
+
+        .notification-info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification-info i {
+            color: var(--primary-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(120%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-title">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>Admin Dashboard</h1>
+                </div>
+                <div class="header-actions">
+                    <button onclick="location.href='analytics.html'" class="btn btn-primary">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </button>
+                    <button onclick="logout()" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <i class="fas fa-users"></i>
+                    <h3>Total Users</h3>
+                </div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Active accounts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <i class="fas fa-coins"></i>
+                    <h3>System Credits</h3>
+                </div>
+                <div class="stat-value" id="totalCredits">0</div>
+                <div class="stat-label">Credits in circulation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Documents</h3>
+                </div>
+                <div class="stat-value" id="totalDocuments">0</div>
+                <div class="stat-label">Total scanned</div>
+            </div>
+        </div>
+
+        <!-- User Management Table -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-users-cog"></i> User Management
+                </div>
+                <div class="table-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="userSearch" placeholder="Search users...">
+                    </div>
+                </div>
+            </div>
+            <table class="stats-table">
+            <thead>
+                <tr>
+                        <th>User</th>
+                    <th>Credits</th>
+                        <th>Documents</th>
+                        <th>Last Activity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                </tr>
+            </thead>
+                <tbody id="usersList"></tbody>
+        </table>
+        </div>
+
+        <!-- Credit Requests Table -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-hand-holding-usd"></i> Credit Requests
+                </div>
+            </div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Current Credits</th>
+                        <th>Requested Amount</th>
+                        <th>Request Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script>
+        // Notification System
+        const notificationSystem = {
+            container: document.getElementById('notificationContainer'),
+
+            show(message, type = 'info') {
+                const id = 'notification-' + Date.now();
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    info: 'fas fa-info-circle'
+                };
+                const titles = {
+                    success: 'Success',
+                    error: 'Error',
+                    info: 'Information'
+                };
+
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.id = id;
+                notification.innerHTML = `
+                    <i class="${icons[type]}"></i>
+                    <div class="notification-content">
+                        <div class="notification-title">${titles[type]}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <div class="notification-close" onclick="notificationSystem.remove('${id}')">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                this.container.appendChild(notification);
+                
+                // Auto remove after duration
+                setTimeout(() => this.remove(id), 5000);
+            },
+
+            remove(id) {
+                const notification = document.getElementById(id);
+                if (notification) {
+                    notification.classList.add('removing');
+                    setTimeout(() => notification.remove(), 500);
+                }
+            }
+        };
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load stats
+                const statsResponse = await fetch('/admin/stats');
+                const statsData = await statsResponse.json();
+                
+                document.getElementById('totalUsers').textContent = statsData.total_users;
+                document.getElementById('totalCredits').textContent = statsData.total_credits;
+                document.getElementById('totalDocuments').textContent = statsData.total_documents;
+
+                // Load users
+                const usersResponse = await fetch('/admin/users');
+                const users = await usersResponse.json();
+                
+                document.getElementById('usersList').innerHTML = users.map(user => `
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div>${user.username}</div>
+                                    <small>${user.email || 'No email'}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.credits}</td>
+                        <td>${user.total_documents}</td>
+                        <td>${user.last_activity || 'Never'}</td>
+                        <td>
+                            <span class="status-badge ${user.credits > 0 ? 'status-active' : 'status-pending'}">
+                                ${user.credits > 0 ? 'Active' : 'No Credits'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-edit" onclick="addCredits('${user.username}')">
+                                    <i class="fas fa-coins"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" onclick="deleteUser('${user.username}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Load credit requests
+                const requestsResponse = await fetch('/admin/credit_requests');
+                const requests = await requestsResponse.json();
+                
+                document.getElementById('requestsList').innerHTML = requests.map(req => `
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>${req.username}</div>
+                            </div>
+                        </td>
+                        <td>${req.current_credits}</td>
+                        <td>${req.requested_amount}</td>
+                        <td>${new Date(req.request_date).toLocaleString()}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-edit" onclick="handleRequest(${req.id}, true)">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" onclick="handleRequest(${req.id}, false)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                notificationSystem.show('Failed to load dashboard data', 'error');
+            }
+        }
+
+        // User search functionality
+        document.getElementById('userSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#usersList tr');
+            
+            rows.forEach(row => {
+                const username = row.querySelector('.user-info div').textContent.toLowerCase();
+                row.style.display = username.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Handle credit requests
+        async function handleRequest(requestId, approve) {
+            try {
+                const response = await fetch(`/admin/credit_requests/${requestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ approve })
+                });
+
+                if (response.ok) {
+                    notificationSystem.show(
+                        `Request ${approve ? 'approved' : 'denied'} successfully`,
+                        'success'
+                    );
+                    loadDashboard();
+                }
+            } catch (error) {
+                notificationSystem.show('Failed to process request', 'error');
+            }
+        }
+
+        // Add credits to user
+        async function addCredits(username) {
+            const amount = prompt('Enter amount of credits to add:');
+            if (amount && !isNaN(amount)) {
+                try {
+                    const response = await fetch('/admin/add_credits', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, amount: parseInt(amount) })
+                    });
+                    
+                    if (response.ok) {
+                        notificationSystem.show('Credits added successfully', 'success');
+                        loadDashboard();
+                    }
+                } catch (error) {
+                    notificationSystem.show('Failed to add credits', 'error');
+                }
+            }
+        }
+
+        // Delete user
+        async function deleteUser(username) {
+            if (confirm(`Are you sure you want to delete user ${username}?`)) {
+                try {
+                    const response = await fetch('/admin/delete/' + username, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        notificationSystem.show('User deleted successfully', 'success');
+                        loadDashboard();
+                    }
+                } catch (error) {
+                    notificationSystem.show('Failed to delete user', 'error');
+                }
+            }
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                notificationSystem.show('Logout failed', 'error');
+            }
+        }
+
+        // Load dashboard when page loads
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

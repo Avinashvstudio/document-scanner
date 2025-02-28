@@ -1,4 +1,3 @@
-# document-scanner
 # Credit-Based Document Scanning System
 
 A self-contained document scanning and matching system with a built-in credit system. Users get daily free scans and can request additional credits from admins.

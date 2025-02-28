@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScanner - Register</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            margin: -20px -20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-header i {
+            font-size: 48px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+
+        .card-header h1 {
+            color: var(--dark-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            color: var(--secondary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+            outline: none;
+        }
+
+        .password-requirements {
+            background: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .password-requirements p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--dark-color);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .password-requirements ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .password-requirements li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            margin: 8px 0;
+            transition: all 0.3s;
+        }
+
+        .password-requirements li i {
+            color: #ccc;
+            transition: all 0.3s;
+        }
+
+        .password-requirements li.valid {
+            color: var(--secondary-color);
+        }
+
+        .password-requirements li.valid i {
+            color: var(--secondary-color);
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .password-toggle i:hover {
+            color: var(--secondary-color);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--secondary-color);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 20px;
+            }
+        }
+
+        .error {
+            border-color: var(--danger-color) !important;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-control.error + .error-message {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="logo">
+                    <i class="fas fa-file-search"></i> DocScanner
+                </a>
+                <div class="nav-links">
+                    <a href="login.html" class="btn btn-primary">Login</a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="card-header">
+                <i class="fas fa-user-plus"></i>
+                <h1>Create Account</h1>
+                <p>Join DocScanner today</p>
+            </div>
+
+            <div class="alert alert-error" id="errorAlert"></div>
+            <div class="alert alert-success" id="successAlert"></div>
+
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="password-toggle">
+                        <input type="password" id="password" class="form-control" required>
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="password-requirements" id="passwordRequirements">
+                    <p><i class="fas fa-shield-alt"></i> Password Requirements:</p>
+                    <ul>
+                        <li id="lengthReq"><i class="fas fa-check-circle"></i> At least 8 characters</li>
+                        <li id="upperReq"><i class="fas fa-check-circle"></i> One uppercase letter</li>
+                        <li id="lowerReq"><i class="fas fa-check-circle"></i> One lowercase letter</li>
+                        <li id="numberReq"><i class="fas fa-check-circle"></i> One number</li>
+                    </ul>
+                </div>
+
+                <div class="loading" id="loadingSpinner">
+                    <i class="fas fa-spinner fa-spin"></i> Creating your account...
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+    </form>
+
+            <div class="form-footer">
+                <p>Already have an account? <a href="login.html">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(message, type) {
+            const alertElement = document.getElementById(type === 'error' ? 'errorAlert' : 'successAlert');
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function showFormError(message, field = null) {
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+
+            if (field) {
+                const input = document.getElementById(field);
+                input.classList.add('error');
+                input.addEventListener('input', () => {
+                    input.classList.remove('error');
+                    errorAlert.style.display = 'none';
+                }, { once: true });
+            }
+
+            setTimeout(() => {
+                errorAlert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Password requirements checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            
+            // Check requirements
+            const requirements = {
+                lengthReq: password.length >= 8,
+                upperReq: /[A-Z]/.test(password),
+                lowerReq: /[a-z]/.test(password),
+                numberReq: /[0-9]/.test(password)
+            };
+
+            // Update UI
+            Object.keys(requirements).forEach(req => {
+                const element = document.getElementById(req);
+                if (requirements[req]) {
+                    element.classList.add('valid');
+                } else {
+                    element.classList.remove('valid');
+                }
+            });
+        });
+
+        const validationRules = {
+            username: {
+                minLength: 3,
+                pattern: /^[a-zA-Z0-9_]+$/,
+                messages: {
+                    required: 'Username is required',
+                    minLength: 'Username must be at least 3 characters long',
+                    pattern: 'Username can only contain letters, numbers, and underscores'
+                }
+            },
+            password: {
+                minLength: 8,
+                pattern: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).*$/,
+                messages: {
+                    required: 'Password is required',
+                    minLength: 'Password must be at least 8 characters long',
+                    pattern: 'Password must contain uppercase, lowercase, and numbers'
+                }
+            }
+        };
+
+        function validateField(field, value) {
+            const rules = validationRules[field];
+            
+            if (!value) {
+                return rules.messages.required;
+            }
+            
+            if (value.length < rules.minLength) {
+                return rules.messages.minLength;
+            }
+            
+            if (!rules.pattern.test(value)) {
+                return rules.messages.pattern;
+            }
+            
+            return null;
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Validate fields
+            const usernameError = validateField('username', username);
+            if (usernameError) {
+                showFormError(usernameError, 'username');
+                return;
+            }
+            
+            const passwordError = validateField('password', password);
+            if (passwordError) {
+                showFormError(passwordError, 'password');
+                return;
+            }
+
+            try {
+                loadingSpinner.style.display = 'block';
+                
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(result.message || 'Registration successful! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showFormError(result.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showFormError('Network error. Please try again later.');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload a Document</h1>
+        <p>Your Credits: <span id="credits">Loading...</span></p>
+        <p>Next Reset Time: <span id="resetTime">Loading...</span></p>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="fileInput" accept=".txt" required>
+            <button type="submit" id="uploadBtn">Upload & Scan</button>
+            <p id="loadingMessage" style="display: none;">Scanning document... Please wait.</p>
+        </form>
+
+        <h2>Scan Results</h2>
+        <pre id="scanResult">No scan yet.</pre>
+
+        <h2>Similar Documents</h2>
+        <ul id="matchesList">No matches found.</ul>
+
+        <div class="buttons">
+            <button onclick="goBack()">Back to Profile</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchUserProfile();
+        });
+
+        function fetchUserProfile() {
+            fetch("/user/profile")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("credits").innerText = data.credits;
+                    document.getElementById("resetTime").innerText = data.next_reset;
+                })
+                .catch(() => {
+                    document.getElementById("credits").innerText = "Error loading credits.";
+                    document.getElementById("resetTime").innerText = "Error loading reset time.";
+                });
+        }
+
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById("fileInput").files[0];
+            if (!fileInput) {
+                alert("Please select a file.");
+                return;
+            }
+            if (!fileInput.name.endsWith(".txt")) {
+                alert("Only .txt files are allowed.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput);
+
+            document.getElementById("uploadBtn").disabled = true;
+            document.getElementById("loadingMessage").style.display = "block";
+
+            fetch("/scan", { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        document.getElementById("scanResult").innerText = data.result;
+                        document.getElementById("credits").innerText = data.remaining_credits;
+                        fetchMatches(data.doc_id);
+                    }
+                })
+                .catch(() => alert("Upload failed. Try again."))
+                .finally(() => {
+                    document.getElementById("uploadBtn").disabled = false;
+                    document.getElementById("loadingMessage").style.display = "none";
+                });
+        });
+
+        function fetchMatches(docId) {
+            fetch(`/matches/${docId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let list = document.getElementById("matchesList");
+                    list.innerHTML = "";
+
+                    if (data.length === 0) {
+                        list.innerHTML = "<li>No similar documents found.</li>";
+                    } else {
+                        data.forEach(doc => {
+                            let item = document.createElement("li");
+                            item.innerText = `${doc.filename} (Similarity: ${doc.similarity * 100}%)`;
+                            list.appendChild(item);
+                        });
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("matchesList").innerHTML = "<li>Error loading matches.</li>";
+                });
+        }
+
+        function goBack() {
+            window.location.href = "profile.html";
+        }
+
+        function logout() {
+            fetch("/auth/logout", { method: "POST" })
+                .then(() => window.location.href = "/");
+        }
+    </script>
+</body>
+</html>
