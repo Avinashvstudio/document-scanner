@@ -46,11 +46,21 @@ class SessionManager:
         return session.get(SessionManager.ADMIN_SESSION)
 
     @staticmethod
+    def is_user_logged_in():
+        """Check if a user is logged in"""
+        return SessionManager.USER_SESSION in session
+
+    @staticmethod
+    def is_admin_logged_in():
+        """Check if an admin is logged in"""
+        return SessionManager.ADMIN_SESSION in session
+
+    @staticmethod
     def user_required(f):
         """Decorator for user-only routes"""
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not SessionManager.get_current_user():
+            if not SessionManager.is_user_logged_in():
                 return jsonify({"error": "User login required"}), 403
             return f(*args, **kwargs)
         return decorated_function
@@ -60,7 +70,7 @@ class SessionManager:
         """Decorator for admin-only routes"""
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not SessionManager.get_current_admin():
+            if not SessionManager.is_admin_logged_in():
                 return jsonify({"error": "Admin login required"}), 403
             return f(*args, **kwargs)
         return decorated_function 

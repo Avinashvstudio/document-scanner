@@ -13,3 +13,124 @@
 2025-03-01 10:08:11,901 WARNING: Request failed: GET /admin/refresh-data - 403
 2025-03-01 10:08:13,140 WARNING: Request failed: POST /auth/logout - 500
 2025-03-01 10:08:16,643 INFO: Admin login successful: admin
+2025-03-01 12:04:10,386 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:04:15,544 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:04:47,711 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:04:53,045 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:04:55,146 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:05:05,046 INFO: Admin login successful: admin
+2025-03-01 12:05:06,116 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:05:10,209 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:05:17,396 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:05:31,979 WARNING: Request failed: POST /auth/register - 500
+2025-03-01 12:05:43,213 WARNING: Request failed: POST /auth/register - 500
+2025-03-01 12:05:58,089 WARNING: Request failed: POST /auth/register - 500
+2025-03-01 12:14:58,207 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:14:59,503 WARNING: Request failed: GET /favicon.ico - 500
+2025-03-01 12:15:20,305 WARNING: Request failed: POST /auth/register - 500
+2025-03-01 12:18:35,534 INFO: New user registered: test
+2025-03-01 12:18:37,664 WARNING: Request failed: GET /favicon.ico - 404
+2025-03-01 12:18:44,677 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:18:50,247 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:19:07,577 WARNING: Request failed: POST /auth/register - 400
+2025-03-01 12:19:23,253 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:20:10,856 INFO: New user registered: testuser
+2025-03-01 12:20:23,746 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:20:39,465 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:20:49,118 WARNING: Request failed: GET /admin/stats - 403
+2025-03-01 12:20:49,125 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:20:52,079 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 12:21:02,060 INFO: Admin login successful: admin
+2025-03-01 12:21:08,526 WARNING: Request failed: GET /user/profile - 403
+2025-03-01 12:21:24,945 WARNING: Request failed: DELETE /admin/delete/test - 500
+2025-03-01 12:21:30,017 WARNING: Request failed: DELETE /admin/delete/test - 500
+2025-03-01 12:21:41,202 WARNING: Request failed: DELETE /admin/delete/test - 500
+2025-03-01 12:22:18,735 INFO: User deleted: test
+2025-03-01 12:22:30,275 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:22:33,919 WARNING: Request failed: GET /admin/refresh-data - 403
+2025-03-01 12:22:36,423 WARNING: Request failed: GET /admin/analytics - 403
+2025-03-01 12:22:36,423 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:23:45,731 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:23:45,731 WARNING: Request failed: GET /admin/analytics - 403
+2025-03-01 12:23:47,157 WARNING: Request failed: POST /auth/logout - 403
+2025-03-01 12:23:49,137 WARNING: Request failed: GET /admin/stats - 403
+2025-03-01 12:23:49,144 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:23:52,103 WARNING: Request failed: POST /auth/logout - 403
+2025-03-01 12:24:07,430 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:24:16,812 INFO: Admin login successful: admin
+2025-03-01 12:26:05,411 ERROR: Analytics error: no such column: topic
+2025-03-01 12:26:05,411 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:26:21,091 ERROR: Analytics error: no such column: topic
+2025-03-01 12:26:21,092 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:26:22,845 ERROR: Analytics error: no such column: topic
+2025-03-01 12:26:22,845 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:26:23,307 ERROR: Analytics error: no such column: topic
+2025-03-01 12:26:23,307 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:26:23,483 ERROR: Analytics error: no such column: topic
+2025-03-01 12:26:23,484 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:27:03,839 ERROR: Analytics error: no such column: topic
+2025-03-01 12:27:03,840 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:27:09,316 ERROR: Analytics error: no such column: topic
+2025-03-01 12:27:09,316 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:27:15,703 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 12:27:27,841 INFO: Admin login successful: admin
+2025-03-01 12:27:30,966 ERROR: Analytics error: no such column: topic
+2025-03-01 12:27:30,966 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:28:13,663 ERROR: Analytics error: no such column: d.topic
+2025-03-01 12:28:13,663 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:28:18,981 ERROR: Analytics error: no such column: d.topic
+2025-03-01 12:28:18,981 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:29:38,646 ERROR: Error getting analytics data: no such column: d.topic
+2025-03-01 12:29:38,646 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:29:39,932 ERROR: Error getting analytics data: no such column: d.topic
+2025-03-01 12:29:39,932 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:31:51,017 WARNING: Request failed: POST /user/change-password - 403
+2025-03-01 12:32:01,890 ERROR: Error getting analytics data: no such column: d.topic
+2025-03-01 12:32:01,890 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:32:10,941 ERROR: Error getting analytics data: no such column: d.topic
+2025-03-01 12:32:10,941 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:32:12,239 ERROR: Error getting analytics data: no such column: d.topic
+2025-03-01 12:32:12,240 WARNING: Request failed: GET /admin/analytics - 500
+2025-03-01 12:32:35,714 WARNING: Request failed: POST /user/change-password - 403
+2025-03-01 12:33:15,600 WARNING: Request failed: GET /user/profile - 403
+2025-03-01 12:33:25,205 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:33:25,206 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:33:31,938 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:33:31,938 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:33:37,686 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:33:37,687 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:33:42,992 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:33:42,993 WARNING: Request failed: GET /admin/analytics - 403
+2025-03-01 12:33:43,700 WARNING: Request failed: GET /admin/stats - 403
+2025-03-01 12:33:43,706 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 12:33:46,357 WARNING: Request failed: POST /auth/logout - 403
+2025-03-01 12:33:52,091 INFO: Admin login successful: admin
+2025-03-01 12:33:56,469 INFO: User deleted: testuser
+2025-03-01 12:34:12,974 INFO: New user registered: testuser
+2025-03-01 12:34:20,293 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:34:20,294 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:34:25,943 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:34:25,944 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:34:31,307 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:35:29,255 INFO: Password changed for user: testuser
+2025-03-01 12:35:35,035 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 12:35:42,344 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:48:13,814 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 12:48:13,814 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 12:48:38,422 INFO: Admin login successful: admin
+2025-03-01 12:48:43,997 INFO: User deleted: testuser
+2025-03-01 12:48:48,270 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 12:49:28,384 WARNING: Request failed: GET /favicon.ico - 404
+2025-03-01 12:50:09,938 INFO: New user registered: testuser
+2025-03-01 12:50:23,327 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 12:50:43,285 INFO: Admin login successful: admin
+2025-03-01 12:51:17,198 WARNING: Request failed: POST /credits/request - 403
+2025-03-01 13:31:07,977 INFO: Password changed for user: testuser
+2025-03-01 13:31:14,832 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 13:31:23,905 WARNING: Failed login attempt: Invalid password - testuser
+2025-03-01 13:31:23,906 WARNING: Request failed: POST /auth/login - 401
+2025-03-01 13:31:27,921 ERROR: Error processing credit reset: strptime() argument 1 must be str, not None
+2025-03-01 13:34:24,844 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 13:34:28,350 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 13:43:44,744 WARNING: Request failed: POST /auth/register - 400
+2025-03-01 13:56:12,468 INFO: Admin login successful: admin

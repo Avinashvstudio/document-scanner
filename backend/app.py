@@ -37,6 +37,10 @@ def get_next_reset_time():
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
+# Add near the top of app.py, after creating the Flask app
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
 # Update initialize_db function
 def initialize_db():
     try:
@@ -180,7 +184,9 @@ def validate_input(**validators):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            data = request.get_json() or request.form
+            # Get data from either JSON or form data
+            data = request.get_json() if request.is_json else request.form
+            
             for field, validator in validators.items():
                 if not validator(data.get(field, '')):
                     return handle_error(f"Invalid {field}")
@@ -196,8 +202,14 @@ def validate_input(**validators):
 )
 def register():
     try:
-        username = request.form.get('username')
-        password = request.form.get('password')
+        # Handle both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+        else:
+            username = request.form.get('username')
+            password = request.form.get('password')
 
         # Enhanced validation
         if not username or not password:
@@ -227,13 +239,16 @@ def register():
             )
             conn.commit()
 
+            # Log successful registration
+            app.logger.info(f"New user registered: {username}")
+
         return jsonify({
             "status": "success",
             "message": "Registration successful"
         })
 
     except Exception as e:
-        print(f"Registration error: {str(e)}")
+        app.logger.error(f"Registration error: {str(e)}")
         return handle_error("An unexpected error occurred", 500)
 
 limiter = Limiter(
@@ -246,7 +261,12 @@ limiter = Limiter(
 @limiter.limit("5 per minute")
 def login():
     try:
-        data = request.get_json()
+        # Handle both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
+
         username = data.get('username')
         password = data.get('password')
         role = data.get('role', 'user')
@@ -265,10 +285,12 @@ def login():
             ''', (username,)).fetchone()
             
             if not user:
-                return jsonify({'success': False, 'error': 'User not found'}), 401
+                app.logger.warning(f"Failed login attempt: User not found - {username}")
+                return jsonify({'success': False, 'error': 'Invalid username or password'}), 401
 
             if not check_password_hash(user['password'], password):
-                return jsonify({'success': False, 'error': 'Invalid password'}), 401
+                app.logger.warning(f"Failed login attempt: Invalid password - {username}")
+                return jsonify({'success': False, 'error': 'Invalid username or password'}), 401
 
             user = dict(user)
             is_admin = bool(user['is_admin'])
@@ -277,11 +299,7 @@ def login():
             if (role == 'admin' and not is_admin) or (role == 'user' and is_admin):
                 return jsonify({'success': False, 'error': 'Invalid role for this user'}), 403
 
-            # Clear any existing sessions
-            SessionManager.clear_user_session()
-            SessionManager.clear_admin_session()
-
-            # Create appropriate session
+            # Create appropriate session without clearing the other
             if is_admin:
                 SessionManager.create_admin_session(user['id'], user['username'])
                 app.logger.info(f"Admin login successful: {username}")
@@ -637,19 +655,33 @@ def get_all_users():
         return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/admin/delete/<username>', methods=['DELETE'])
+@SessionManager.admin_required
 def delete_user(username):
-    if admin_required():
-        return admin_required()
+    try:
+        if username == "admin":
+            return jsonify({"error": "Cannot delete admin account"}), 400
 
-    if username == "admin":
-        return jsonify({"error": "Cannot delete admin account"}), 400
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Check if user exists
+            user = cursor.execute("SELECT 1 FROM users WHERE username = ?", (username,)).fetchone()
+            if not user:
+                return jsonify({"error": "User not found"}), 404
 
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM users WHERE username = ?", (username,))
-        conn.commit()
+            # Delete user and related data
+            cursor.execute("DELETE FROM users WHERE username = ?", (username,))
+            cursor.execute("DELETE FROM documents WHERE user_id IN (SELECT id FROM users WHERE username = ?)", (username,))
+            cursor.execute("DELETE FROM scan_history WHERE user_id IN (SELECT id FROM users WHERE username = ?)", (username,))
+            
+            conn.commit()
+            
+            app.logger.info(f"User deleted: {username}")
+            return jsonify({"success": True, "message": f"User {username} deleted successfully"})
 
-    return jsonify({"success": True})
+    except Exception as e:
+        app.logger.error(f"Error deleting user: {str(e)}")
+        return jsonify({"error": "Failed to delete user"}), 500
 
 @app.route('/admin/analytics')
 @SessionManager.admin_required
@@ -793,23 +825,21 @@ def scan_history():
 
     return jsonify([dict(entry) for entry in history])
 
-# Current configuration
+# Update the session configuration (add near the top where other configs are)
 app.config.update(
     SESSION_TYPE='filesystem',
     SESSION_PERMANENT=True,
     PERMANENT_SESSION_LIFETIME=timedelta(days=1),
     SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_FILE_DIR='./flask_session',  # Directory to store session files
-    SESSION_KEY_PREFIX='docscanner_'
+    SESSION_COOKIE_SAMESITE='Lax'
 )
-
-# Secret key handling
-app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # Initialize Flask-Session
 Session(app)
+
+# Secret key handling
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # Create session directory if it doesn't exist
 os.makedirs('./flask_session', exist_ok=True)
@@ -957,10 +987,9 @@ def add_user_credits():
 
 # Add this new route for credit requests
 @app.route('/credits/request', methods=['POST'])
+@SessionManager.user_required  # Add the decorator for session management
 def request_credits():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 403
-        
+    user_session = SessionManager.get_current_user()  # Get current user from session manager
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -969,15 +998,15 @@ def request_credits():
             existing_request = cursor.execute("""
                 SELECT 1 FROM credit_requests 
                 WHERE user_id = ? AND status = 'pending'
-            """, (session['user_id'],)).fetchone()
+            """, (user_session['user_id'],)).fetchone()
             
             if existing_request:
-                return "You already have a pending credit request", 400
+                return jsonify({"error": "You already have a pending credit request"}), 400
             
             # Get user's current credits
             user = cursor.execute("""
                 SELECT credits FROM users WHERE id = ?
-            """, (session['user_id'],)).fetchone()
+            """, (user_session['user_id'],)).fetchone()
             
             # Default request amount (you can modify this logic)
             requested_amount = 20
@@ -986,21 +1015,27 @@ def request_credits():
             cursor.execute("""
                 INSERT INTO credit_requests (user_id, requested_amount)
                 VALUES (?, ?)
-            """, (session['user_id'], requested_amount))
+            """, (user_session['user_id'], requested_amount))
             
             # Log the request
             cursor.execute("""
                 INSERT INTO activity_log (username, action)
                 VALUES (?, ?)
-            """, (session['username'], f"Requested {requested_amount} credits"))
+            """, (user_session['username'], f"Requested {requested_amount} credits"))
             
             conn.commit()
 
-        return "Credit request submitted successfully. An admin will review your request.", 200
+            return jsonify({
+                "success": True,
+                "message": "Credit request submitted successfully. An admin will review your request."
+            })
         
     except Exception as e:
-        print(f"Error requesting credits: {str(e)}")
-        return "Failed to submit credit request", 500
+        app.logger.error(f"Error requesting credits: {str(e)}")
+        return jsonify({
+            "error": "Failed to submit credit request",
+            "details": str(e)
+        }), 500
 
 @app.route('/admin/export-data')
 def export_analytics_data():
@@ -1213,11 +1248,14 @@ def delete_scan_history(scan_id):
         return handle_error("Failed to delete scan history", 500)
 
 @app.route('/user/change-password', methods=['POST'])
+@SessionManager.user_required  # Add proper session check
 def change_password():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 403
-        
     try:
+        # Get current user from session
+        user_session = SessionManager.get_current_user()
+        if not user_session:
+            return jsonify({"error": "User not authenticated"}), 403
+        
         data = request.get_json()
         current_password = data.get('currentPassword')
         new_password = data.get('newPassword')
@@ -1234,7 +1272,7 @@ def change_password():
             # Get user's current password
             user = cursor.execute(
                 "SELECT password FROM users WHERE id = ?", 
-                (session['user_id'],)
+                (user_session['user_id'],)
             ).fetchone()
             
             if not user:
@@ -1248,10 +1286,11 @@ def change_password():
             hashed_password = generate_password_hash(new_password)
             cursor.execute(
                 "UPDATE users SET password = ? WHERE id = ?",
-                (hashed_password, session['user_id'])
+                (hashed_password, user_session['user_id'])
             )
             
             conn.commit()
+            app.logger.info(f"Password changed for user: {user_session['username']}")
 
         return jsonify({
             "success": True,
@@ -1259,7 +1298,7 @@ def change_password():
         })
         
     except Exception as e:
-        print(f"Error changing password: {str(e)}")
+        app.logger.error(f"Error changing password: {str(e)}")
         return jsonify({"error": "Failed to change password"}), 500
 
 @app.errorhandler(Exception)
@@ -1376,6 +1415,11 @@ def refresh_admin_data():
             'success': False,
             'error': 'Failed to refresh data'
         }), 500
+
+# Add this route near the other static file routes
+@app.route('/favicon.ico')
+def favicon():
+    return '', 404  # Return empty response with 404 status code
 
 if __name__ == '__main__':
     app.run(debug=True)
