@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         .analytics-header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -270,6 +272,49 @@
                 text-align: center;
             }
         }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification-success {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .notification-error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -285,7 +330,10 @@
                 </div>
                 <div class="header-actions">
                     <button onclick="exportData()" class="btn btn-secondary">
-                        <i class="fas fa-download"></i> Export Data
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                    <button onclick="exportPDF()" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Export PDF Report
                     </button>
                 </div>
             </div>
@@ -712,6 +760,157 @@
                 console.error('Error exporting data:', error);
                 alert('Failed to export data');
             }
+        }
+
+        async function exportPDF() {
+            try {
+                showLoaders(true);
+                
+                // Fetch latest data
+                const response = await fetch('/admin/analytics');
+                const data = await response.json();
+                
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Title
+                doc.setFontSize(20);
+                doc.setTextColor(41, 128, 185); // Primary color
+                doc.text('DocScanner Analytics Report', 15, 20);
+                
+                // Date
+                doc.setFontSize(12);
+                doc.setTextColor(100);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 15, 30);
+                
+                // Summary Section
+                doc.setFontSize(16);
+                doc.setTextColor(0);
+                doc.text('System Summary', 15, 45);
+                
+                doc.setFontSize(12);
+                doc.text([
+                    `Total Users: ${data.total_users}`,
+                    `Total Documents: ${data.total_documents}`,
+                    `Total Credits in System: ${data.total_credits}`,
+                    `Active Scans Today: ${data.usage_data.values[data.usage_data.values.length - 1]}`
+                ], 20, 55);
+
+                // Top Users Table
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Top Users Performance', 15, 20);
+                
+                const userTableData = data.top_users.map(user => [
+                    user.username,
+                    user.total_scans,
+                    user.credits_used,
+                    user.common_topic,
+                    user.success_rate + '%',
+                    user.last_activity
+                ]);
+
+                doc.autoTable({
+                    startY: 30,
+                    head: [['Username', 'Total Scans', 'Credits Used', 'Common Topic', 'Success Rate', 'Last Activity']],
+                    body: userTableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] }
+                });
+
+                // Topics Analysis
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Document Topics Analysis', 15, 20);
+                
+                const topicsTableData = data.topics_analysis.map(topic => [
+                    topic.name,
+                    topic.count,
+                    topic.percentage + '%',
+                    topic.average_similarity + '%',
+                    topic.trend
+                ]);
+
+                doc.autoTable({
+                    startY: 30,
+                    head: [['Topic', 'Count', 'Percentage', 'Avg. Similarity', 'Trend']],
+                    body: topicsTableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] }
+                });
+
+                // Usage Trends
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Usage Trends', 15, 20);
+
+                // Convert charts to images and add them
+                for (const chartId of ['usageChart', 'creditsChart', 'activityChart']) {
+                    const chart = chartInstances[chartId];
+                    if (chart) {
+                        const chartImage = chart.canvas.toDataURL('image/png');
+                        const imgWidth = 180;
+                        const imgHeight = (chart.canvas.height * imgWidth) / chart.canvas.width;
+                        
+                        doc.addImage(chartImage, 'PNG', 15, doc.lastAutoTable.finalY + 20, imgWidth, imgHeight);
+                        doc.addPage();
+                    }
+                }
+
+                // Recommendations Section
+                doc.setFontSize(16);
+                doc.text('System Recommendations', 15, 20);
+                
+                // Calculate recommendations based on data
+                const recommendations = [];
+                
+                // Credit usage recommendation
+                const avgCredits = data.top_users.reduce((sum, user) => sum + user.credits_used, 0) / data.top_users.length;
+                if (avgCredits < 10) {
+                    recommendations.push('Consider increasing initial credit allocation to encourage more usage.');
+                }
+                
+                // Activity recommendation
+                const recentActivity = data.usage_data.values.slice(-7);
+                const avgActivity = recentActivity.reduce((a, b) => a + b, 0) / recentActivity.length;
+                if (avgActivity < 5) {
+                    recommendations.push('User engagement is low. Consider implementing user engagement strategies.');
+                }
+                
+                // Success rate recommendation
+                const avgSuccessRate = data.top_users.reduce((sum, user) => sum + user.success_rate, 0) / data.top_users.length;
+                if (avgSuccessRate < 70) {
+                    recommendations.push('Document matching accuracy could be improved. Consider reviewing matching algorithms.');
+                }
+
+                doc.setFontSize(12);
+                recommendations.forEach((rec, index) => {
+                    doc.text(`${index + 1}. ${rec}`, 20, 35 + (index * 10));
+                });
+
+                // Save the PDF
+                doc.save(`docscanner-analytics-${new Date().toISOString().split('T')[0]}.pdf`);
+                
+                showNotification('PDF report generated successfully', 'success');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showNotification('Failed to generate PDF report', 'error');
+            } finally {
+                showLoaders(false);
+            }
+        }
+
+        // Add this helper function for notifications
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
         }
     </script>
 </body>

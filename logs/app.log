@@ -1,0 +1,15 @@
+2025-03-01 09:57:21,749 WARNING: Request failed: POST /credits/request - 400
+2025-03-01 10:05:18,605 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 10:05:35,789 WARNING: Request failed: POST /scan - 400
+2025-03-01 10:06:40,843 WARNING: Request failed: GET /admin/stats - 403
+2025-03-01 10:06:40,875 WARNING: Request failed: GET /admin/users - 403
+2025-03-01 10:06:47,071 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 10:06:50,460 INFO: Admin login successful: admin
+2025-03-01 10:07:24,679 WARNING: Request failed: GET /user/profile - 403
+2025-03-01 10:07:28,804 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 10:07:39,527 INFO: Admin login successful: admin
+2025-03-01 10:07:48,008 WARNING: Request failed: POST /scan - 403
+2025-03-01 10:07:57,411 WARNING: Request failed: GET /user/profile - 403
+2025-03-01 10:08:11,901 WARNING: Request failed: GET /admin/refresh-data - 403
+2025-03-01 10:08:13,140 WARNING: Request failed: POST /auth/logout - 500
+2025-03-01 10:08:16,643 INFO: Admin login successful: admin

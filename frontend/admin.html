@@ -234,7 +234,7 @@
             }
         }
 
-        /* Notification styles */
+        /* Updated Notification Styles */
         .notification-container {
             position: fixed;
             top: 20px;
@@ -243,27 +243,47 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            max-width: 350px;
         }
 
         .notification {
-            min-width: 300px;
-            padding: 15px 20px;
-            border-radius: 8px;
             background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 15px;
-            transform: translateX(120%);
-            animation: slideIn 0.5s forwards;
+            gap: 12px;
+            animation: slideIn 0.5s ease-out;
+            border-left: 4px solid;
         }
 
-        .notification.removing {
-            animation: slideOut 0.5s forwards;
+        .notification-success {
+            border-left-color: var(--secondary-color);
+        }
+
+        .notification-error {
+            border-left-color: var(--danger-color);
+        }
+
+        .notification-info {
+            border-left-color: var(--primary-color);
         }
 
         .notification i {
             font-size: 20px;
+        }
+
+        .notification-success i {
+            color: var(--secondary-color);
+        }
+
+        .notification-error i {
+            color: var(--danger-color);
+        }
+
+        .notification-info i {
+            color: var(--primary-color);
         }
 
         .notification-content {
@@ -271,8 +291,9 @@
         }
 
         .notification-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark-color);
         }
 
         .notification-message {
@@ -280,50 +301,68 @@
             color: #666;
         }
 
-        .notification-close {
-            cursor: pointer;
-            padding: 5px;
-            color: #666;
-            transition: color 0.3s;
-        }
-
-        .notification-close:hover {
-            color: #333;
-        }
-
-        /* Notification types */
-        .notification-success {
-            border-left: 4px solid var(--secondary-color);
-        }
-
-        .notification-success i {
-            color: var(--secondary-color);
-        }
-
-        .notification-error {
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .notification-error i {
-            color: var(--danger-color);
-        }
-
-        .notification-info {
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .notification-info i {
-            color: var(--primary-color);
-        }
-
         @keyframes slideIn {
-            from { transform: translateX(120%); }
-            to { transform: translateX(0); }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        @keyframes slideOut {
-            from { transform: translateX(0); }
-            to { transform: translateX(120%); }
+        @keyframes fadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .notification.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .refresh-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .refresh-btn i {
+            transition: transform 0.5s;
+        }
+
+        .refresh-btn.refreshing i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -348,6 +387,13 @@
     </div>
 
     <div class="container">
+        <div class="dashboard-header">
+            <h2>Admin Dashboard</h2>
+            <button class="refresh-btn" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+
         <div class="dashboard-stats">
             <div class="stat-card">
                 <div class="stat-header">
@@ -372,6 +418,14 @@
                 </div>
                 <div class="stat-value" id="totalDocuments">0</div>
                 <div class="stat-label">Total scanned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <i class="fas fa-clock"></i>
+                    <h3>Pending Requests</h3>
+                </div>
+                <div class="stat-value" id="pendingRequests">0</div>
+                <div class="stat-label">Awaiting approval</div>
             </div>
         </div>
 
@@ -483,6 +537,7 @@
                 document.getElementById('totalUsers').textContent = statsData.total_users;
                 document.getElementById('totalCredits').textContent = statsData.total_credits;
                 document.getElementById('totalDocuments').textContent = statsData.total_documents;
+                document.getElementById('pendingRequests').textContent = statsData.pending_requests;
 
                 // Load users
                 const usersResponse = await fetch('/admin/users');
@@ -644,6 +699,101 @@
 
         // Load dashboard when page loads
         document.addEventListener('DOMContentLoaded', loadDashboard);
+
+        async function refreshDashboard() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.classList.add('refreshing');
+            refreshBtn.disabled = true;
+
+            try {
+                const response = await fetch('/admin/refresh-data');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update stats
+                    document.getElementById('totalUsers').textContent = data.stats.total_users;
+                    document.getElementById('totalCredits').textContent = data.stats.total_credits;
+                    document.getElementById('totalDocuments').textContent = data.stats.total_documents;
+                    document.getElementById('pendingRequests').textContent = data.stats.pending_requests;
+
+                    // Update users table
+                    const usersList = document.getElementById('usersList');
+                    usersList.innerHTML = data.users.map(user => `
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div>${user.username}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${user.credits}</td>
+                            <td>${user.total_documents}</td>
+                            <td>${user.last_activity}</td>
+                            <td>
+                                <span class="status-badge ${user.credits > 0 ? 'status-active' : 'status-pending'}">
+                                    ${user.credits > 0 ? 'Active' : 'No Credits'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon btn-edit" onclick="addCredits('${user.username}')">
+                                        <i class="fas fa-coins"></i>
+                                    </button>
+                                    <button class="btn-icon btn-delete" onclick="deleteUser('${user.username}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    showNotification('Dashboard data refreshed successfully', 'success');
+                } else {
+                    showNotification('Failed to refresh data', 'error');
+                }
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+                showNotification('Error refreshing dashboard data', 'error');
+            } finally {
+                refreshBtn.classList.remove('refreshing');
+                refreshBtn.disabled = false;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'exclamation-circle' : 'info-circle';
+            
+            const title = type === 'success' ? 'Success' :
+                         type === 'error' ? 'Error' : 'Information';
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+
+            const container = document.getElementById('notificationContainer');
+            container.appendChild(notification);
+
+            // Remove notification after delay
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Optional: Add auto-refresh every 5 minutes
+        setInterval(refreshDashboard, 300000); // 5 minutes
     </script>
 </body>
 </html>
