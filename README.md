@@ -9,6 +9,7 @@ A self-contained document scanning and matching system with a built-in credit sy
 - Role-based access (Admin/Regular users)
 - Profile management
 - Secure password hashing
+- **Multiple session support** (Users and admins can log in from different devices)
 
 ### Credit System
 - 20 free scans per day (resets at midnight)
@@ -36,14 +37,14 @@ A self-contained document scanning and matching system with a built-in credit sy
 - Backend: Python/Flask
 - Database: SQLite
 - Frontend: HTML, CSS, JavaScript (Vanilla)
-- Authentication: Session-based with Flask-Session
+- Authentication: Session-based with Flask-Session (supports multiple sessions per user)
 - File Storage: Local filesystem
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/document-scanner.git
+git clone https://github.com/Avinashvstudio/document-scanner.git
 cd document-scanner
 ```
 
@@ -88,9 +89,9 @@ document-scanner/
 │   ├── profile.html       # User profile
 │   ├── upload.html        # Document upload
 │   ├── admin.html         # Admin dashboard
-│   └── analytics.html     # Analytics dashboard
+│   ├── analytics.html     # Analytics dashboard
 ├── database/              # SQLite database and uploads
-├── flask_session/         # Session storage
+├── flask_session/         # Session storage (supports multiple active sessions)
 ├── requirements.txt       # Python dependencies
 └── README.md             # This file
 ```
@@ -99,7 +100,7 @@ document-scanner/
 
 ### Authentication
 - `POST /auth/register` - User registration
-- `POST /auth/login` - User login
+- `POST /auth/login` - User login (Supports multiple active sessions)
 - `POST /auth/logout` - User logout
 
 ### User Operations
@@ -121,7 +122,7 @@ document-scanner/
 ## Security Features
 
 - Password hashing using Werkzeug
-- Session-based authentication
+- Session-based authentication (Supports multiple sessions per user)
 - CSRF protection
 - Input validation
 - Role-based access control
@@ -129,25 +130,4 @@ document-scanner/
 ## License
 
 MIT License
-```
 
-```text:requirements.txt
-Flask==3.0.0
-Werkzeug==3.0.1
-Flask-Session==0.5.0
-python-dotenv==1.0.0
-```
-
-The README.md provides comprehensive documentation of the system, including:
-- Feature overview
-- Installation instructions
-- Project structure
-- Security features
-
-The requirements.txt lists the main Python packages needed to run the application.
-
-Key dependencies:
-- Flask: Web framework
-- Werkzeug: WSGI utilities (includes password hashing)
-- Flask-Session: Session handling
-- python-dotenv: Environment variable management
